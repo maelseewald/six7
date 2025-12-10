@@ -25,27 +25,48 @@
     font-size: 100vh;
     margin: 0;
     padding: 0;
-    
     user-select: none;
     -webkit-user-select: none;
     text-align: center;
   }
 
-
-
+  /* Overlay */
+  #overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #111;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-family: sans-serif;
+    font-size: 2rem;
+    text-align: center;
+    cursor: pointer;
+    z-index: 9999;
+  }
 </style>
 </head>
 <body>
+  <!-- Overlay -->
+  <div id="overlay">
+    Klick irgendwo um alles zu starten!
+  </div>
+
   <div class="center">
     <h1 class="number" id="num">67</h1>
   </div>
 
+  <!-- Audio -->
+  <audio id="bgAudio" src="man-scream.mp3" loop></audio>
+  <audio id="bgAudio2" src="six-seven.mp3" loop></audio>
+
 <script>
 function hexToRgb(hex){
   hex = hex.replace('#','');
-  if(hex.length === 3){
-    hex = hex.split('').map(c => c+c).join('');
-  }
+  if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
   const n = parseInt(hex,16);
   return [(n>>16)&255, (n>>8)&255, n&255];
 }
@@ -65,49 +86,50 @@ function randHex(){
   const v = Math.floor(Math.random()*0xFFFFFF);
   return '#' + v.toString(16).padStart(6,'0');
 }
-
 function pickContrastingPair(minRatio = 4.5){
-  let a, b;
-  let attempts = 0;
+  let a,b, attempts=0;
   do {
-    a = randHex();
-    b = randHex();
-    attempts++;
-    if(attempts > 1000) {
-      return ['#000000','#FFFFFF'];
-    }
-  } while (a.toLowerCase() === b.toLowerCase() || contrastRatio(a,b) < minRatio);
+    a=randHex(); b=randHex(); attempts++;
+    if(attempts>1000) return ['#000000','#FFFFFF'];
+  } while(a.toLowerCase()===b.toLowerCase() || contrastRatio(a,b)<minRatio);
   return [a,b];
 }
 
-/* --- Hauptlogik: Farben zyklisch wechseln --- */
+// Elemente
 const numEl = document.getElementById('num');
+const audio = document.getElementById('bgAudio');
+const audio2 = document.getElementById('bgAudio2');
+const overlay = document.getElementById('overlay');
 
-// Startfarbe initial setzen
-let [bgColor, fgColor] = pickContrastingPair(4.5);
-document.body.style.backgroundColor = bgColor;
-numEl.style.color = fgColor;
+let colorInterval;
 
+// Funktion, die alles starten lässt
+function startChaos() {
+  overlay.style.display = 'none';
+  audio.play().catch(e => console.log('Audio konnte nicht abgespielt werden:', e));
+  audio2.play().catch(e => console.log('Audio konnte nicht abgespielt werden:', e));
 
-const INTERVAL_MS = 20;
-
-let safeTimer = setInterval(() => {
-  let pair = pickContrastingPair(4.5);
-
-  if(pair[0].toLowerCase() === bgColor.toLowerCase() && pair[1].toLowerCase() === fgColor.toLowerCase()){
-    pair = pickContrastingPair(4.5);
-  }
-
-  bgColor = pair[0];
-  fgColor = pair[1];
-
+  // Startfarben
+  let [bgColor, fgColor] = pickContrastingPair(4.5);
   document.body.style.backgroundColor = bgColor;
   numEl.style.color = fgColor;
 
-  numEl.style.textShadow = `0 0 30px ${fgColor}88, 0 8px 40px ${bgColor}88`;
-}, INTERVAL_MS);
+  const INTERVAL_MS = 20;
 
-window.addEventListener('beforeunload', () => clearInterval(safeTimer));
+  colorInterval = setInterval(() => {
+    let pair = pickContrastingPair(4.5);
+    if(pair[0].toLowerCase()===bgColor.toLowerCase() && pair[1].toLowerCase()===fgColor.toLowerCase()){
+      pair=pickContrastingPair(4.5);
+    }
+    bgColor = pair[0]; fgColor = pair[1];
+    document.body.style.backgroundColor = bgColor;
+    numEl.style.color = fgColor;
+    numEl.style.textShadow = `0 0 30px ${fgColor}88, 0 8px 40px ${bgColor}88`;
+  }, INTERVAL_MS);
+}
+
+// Klick auf Overlay = alles startet
+overlay.addEventListener('click', startChaos);
 </script>
 </body>
 </html>
