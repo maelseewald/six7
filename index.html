@@ -59,6 +59,7 @@
 
   <audio id="bgAudio" src="man-scream.mp3" loop></audio>
   <audio id="bgAudio2" src="six-seven.mp3" loop></audio>
+  <audio id="bgAudio3" src="1210.mp3" loop></audio>
 
 <script>
 function hexToRgb(hex){
@@ -95,6 +96,7 @@ function pickContrastingPair(minRatio = 4.5){
 const numEl = document.getElementById('num');
 const audio = document.getElementById('bgAudio');
 const audio2 = document.getElementById('bgAudio2');
+const audio3 = document.getElementById('bgAudio3');
 const overlay = document.getElementById('overlay');
 
 let colorInterval;
@@ -102,9 +104,13 @@ let colorInterval;
 function startChaos() {
   overlay.style.display = 'none';
 
+audio.volume = 0.5;   // 50% Lautstärke
+audio2.volume = 0.3;  // 30% Lautstärke
+audio3.volume = 1;  // 70% Lautstärke
   // Audio starten
   audio.play().catch(e=>console.log(e));
   audio2.play().catch(e=>console.log(e));
+  audio3.play().catch(e=>console.log(e));
 
   // Fullscreen starten
   if (document.documentElement.requestFullscreen) {
